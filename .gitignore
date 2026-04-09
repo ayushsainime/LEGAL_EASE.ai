@@ -1,2 +1,10 @@
+*.db
+*.py[cod]
+__pycache__/
+assets/external/
+.web
+.states
 .venv
 media_tutor_ai
+.env
+ap_key.py

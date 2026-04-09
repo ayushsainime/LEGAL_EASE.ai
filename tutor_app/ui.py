@@ -3,7 +3,7 @@ from __future__ import annotations
 import reflex as rx
 
 from tutor_app.constants import APP_TITLE, UPLOAD_ID
-from tutor_app.state import TutorState
+from tutor_app.state import TutorState, ChatMessage
 
 
 def upload_box() -> rx.Component:
@@ -118,6 +118,76 @@ def error_text() -> rx.Component:
     )
 
 
+def chat_message_bubble(msg: ChatMessage) -> rx.Component:
+    """Render a single chat message as a styled bubble."""
+    is_tutor = msg.role == "tutor"
+    return rx.box(
+        rx.text(
+            msg.content,
+            white_space="pre-wrap",
+            line_height="1.6",
+        ),
+        padding="0.85em 1.1em",
+        border_radius="12px",
+        max_width="85%",
+        align_self=rx.cond(is_tutor, "start", "end"),
+        bg=rx.cond(is_tutor, "#e0ecff", "#dcfce7"),
+        margin_bottom="0.5em",
+    )
+
+
+def chat_box() -> rx.Component:
+    """Chat panel for follow-up Socratic conversation."""
+    return rx.cond(
+        TutorState.extracted_text != "",
+        rx.box(
+            rx.heading("Continue the Conversation", size="5"),
+            rx.text(
+                "Ask follow-up questions about the math problem. "
+                "The tutor will guide you with more Socratic questions.",
+                color="#475569",
+                margin_bottom="1em",
+            ),
+            # Chat messages area
+            rx.box(
+                rx.foreach(TutorState.chat_messages, chat_message_bubble),
+                width="100%",
+                max_height="400px",
+                overflow_y="auto",
+                padding="0.75em",
+                border_radius="12px",
+                bg="#f8fafc",
+                border="1px solid #e2e8f0",
+                margin_bottom="1em",
+                display="flex",
+                flex_direction="column",
+            ),
+            # Input area
+            rx.hstack(
+                rx.input(
+                    placeholder="Ask a follow-up question…",
+                    value=TutorState.chat_input,
+                    on_change=TutorState.set_chat_input,
+                    flex="1",
+                ),
+                rx.button(
+                    "Send",
+                    on_click=TutorState.send_chat_message,
+                    loading=TutorState.is_chat_loading,
+                    color_scheme="blue",
+                ),
+                width="100%",
+                spacing="2",
+            ),
+            width="100%",
+            padding="1.25em",
+            border_radius="16px",
+            bg="white",
+            box_shadow="0 10px 30px rgba(15, 23, 42, 0.08)",
+        ),
+    )
+
+
 def index() -> rx.Component:
     return rx.center(
         rx.vstack(
@@ -153,6 +223,7 @@ def index() -> rx.Component:
             response_box(),
             extracted_text_box(),
             math_analysis_box(),
+            chat_box(),
             spacing="5",
             align="center",
             width="100%",

@@ -7,3 +7,5 @@ __pycache__
 reflex.db
 
 media_tutor_ai
+.env
+ap_key.py

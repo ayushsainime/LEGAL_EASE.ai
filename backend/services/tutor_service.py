@@ -50,3 +50,43 @@ def ask_socratic_question(
         return completion.choices[0].message.content or "No response was returned."
     except Exception as error:
         raise RuntimeError(f"Groq request failed: {error}") from error
+
+
+def ask_followup_question(
+    extracted_text: str,
+    problem_type: str,
+    structure_summary: str,
+    verification_summary: str,
+    chat_history: list[dict],
+    user_question: str,
+) -> str:
+    """Continue a Socratic conversation about the math problem."""
+    system_prompt = (
+        "You are a Socratic tutor for handwritten math. "
+        "You guide students through problems by asking probing questions—never by giving away answers. "
+        f"The extracted math is: {extracted_text}. "
+        f"The detected problem type is: {problem_type}. "
+        f"The structural analysis is: {structure_summary}. "
+        f"The symbolic verification summary is: {verification_summary}. "
+        "Keep your responses concise (2-4 sentences). "
+        "Always end with a guiding question that nudges the student forward."
+    )
+
+    # Build the message list from chat history
+    messages = [{"role": "system", "content": system_prompt}]
+    for msg in chat_history:
+        role = "assistant" if msg["role"] == "tutor" else "user"
+        messages.append({"role": role, "content": msg["content"]})
+
+    # The latest user message is already in chat_history, but ensure it's last
+    messages.append({"role": "user", "content": user_question})
+
+    try:
+        client = get_groq_client()
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=messages,
+        )
+        return completion.choices[0].message.content or "No response was returned."
+    except Exception as error:
+        raise RuntimeError(f"Groq request failed: {error}") from error

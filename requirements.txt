@@ -1,4 +1,5 @@
 reflex==0.8.27
+fastapi>=0.100.0
 pix2tex==0.1.4
 sympy==1.14.0
 antlr4-python3-runtime==4.11.1
