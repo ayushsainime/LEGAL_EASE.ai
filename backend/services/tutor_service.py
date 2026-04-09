@@ -1,10 +1,27 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from groq import Groq
 
 _groq_client: Groq | None = None
+
+
+def _read_key_from_dotenv() -> str | None:
+    """Read GROQ_API_KEY from project .env when env var is not exported."""
+    env_path = Path(__file__).resolve().parents[2] / ".env"
+    if not env_path.exists():
+        return None
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        if key.strip() == "GROQ_API_KEY":
+            return value.strip().strip('"').strip("'")
+    return None
 
 
 def get_groq_client() -> Groq:
@@ -12,7 +29,7 @@ def get_groq_client() -> Groq:
     global _groq_client
 
     if _groq_client is None:
-        api_key = os.getenv("GROQ_API_KEY")
+        api_key = os.getenv("GROQ_API_KEY") or _read_key_from_dotenv()
         if not api_key:
             raise RuntimeError("Set the GROQ_API_KEY environment variable first.")
         _groq_client = Groq(api_key=api_key)
@@ -63,7 +80,7 @@ def ask_followup_question(
     """Continue a Socratic conversation about the math problem."""
     system_prompt = (
         "You are a Socratic tutor for handwritten math. "
-        "You guide students through problems by asking probing questions—never by giving away answers. "
+        "You guide students through problems by asking probing questions and never giving away answers. "
         f"The extracted math is: {extracted_text}. "
         f"The detected problem type is: {problem_type}. "
         f"The structural analysis is: {structure_summary}. "
@@ -72,13 +89,11 @@ def ask_followup_question(
         "Always end with a guiding question that nudges the student forward."
     )
 
-    # Build the message list from chat history
     messages = [{"role": "system", "content": system_prompt}]
     for msg in chat_history:
         role = "assistant" if msg["role"] == "tutor" else "user"
         messages.append({"role": role, "content": msg["content"]})
 
-    # The latest user message is already in chat_history, but ensure it's last
     messages.append({"role": "user", "content": user_question})
 
     try:

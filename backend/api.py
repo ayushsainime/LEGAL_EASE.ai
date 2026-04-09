@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, File, UploadFile
-import reflex as rx
 
 from backend.models import AnalyzeImageResponse
 from backend.services.math_ocr_service import extract_latex_from_image
@@ -33,7 +32,7 @@ async def analyze_image_api(file: UploadFile = File(...)) -> AnalyzeImageRespons
 
     return AnalyzeImageResponse(
         filename=saved_path.name,
-        image_url=rx.get_upload_url(saved_path.name),
+        image_url=f"/_upload/{saved_path.name}",
         extracted_text=extracted_text,
         problem_type=math_analysis.problem_type,
         structure_summary=math_analysis.structure_summary,

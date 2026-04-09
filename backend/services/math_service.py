@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 
 from sympy import Equality, simplify, solveset
 from sympy.core.relational import Relational
@@ -13,6 +14,44 @@ class MathAnalysis:
     structure_summary: str
     verification_summary: str
     normalized_expression: str
+
+
+def _flatten_array_blocks(latex_text: str) -> str:
+    """Convert LaTeX array blocks into plain line-separated text."""
+    text = re.sub(r"\\begin\{array\}\{[^}]*\}", "", latex_text)
+    text = text.replace(r"\end{array}", "")
+    text = text.replace(r"\\", "\n")
+    text = text.replace("&", " ")
+    return text
+
+
+def _strip_text_macros(latex_text: str) -> str:
+    """Remove noisy text wrappers that OCR often injects."""
+    text = latex_text
+    text = re.sub(r"\\left\s*[\|\(\[\{]", "", text)
+    text = re.sub(r"\\right\s*[\|\)\]\}]", "", text)
+    text = text.replace(r"\displaystyle", "")
+    text = re.sub(r"\\operatorname\{([^{}]*)\}", r"\1", text)
+    text = re.sub(r"\\mathrm\{([^{}]*)\}", r"\1", text)
+    text = re.sub(r"\\mathbf\{([^{}]*)\}", r"\1", text)
+    text = re.sub(r"[^a-zA-Z0-9\\+\-*/^_=().{}\[\] \n]", " ", text)
+    text = text.replace("~", " ")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
+
+
+def _extract_best_equation_candidate(latex_text: str) -> str:
+    """Pick the line most likely to contain the usable equation."""
+    flattened = _flatten_array_blocks(latex_text)
+    raw_lines = [line for line in flattened.splitlines() if line.strip()]
+    cleaned_lines = [_strip_text_macros(line).strip(" {}") for line in raw_lines]
+    lines = [line for line in cleaned_lines if line]
+    equation_lines = [line for line in lines if "=" in line]
+    if equation_lines:
+        return equation_lines[0]
+    if lines:
+        return lines[0]
+    return _strip_text_macros(flattened)
 
 
 def classify_problem_type(latex_text: str, parsed_expr) -> str:
@@ -83,13 +122,41 @@ def verify_expression(parsed_expr) -> tuple[str, str]:
 
 
 def analyze_math_expression(latex_text: str) -> MathAnalysis:
-    """Parse LaTeX into SymPy and return a lightweight analysis."""
-    try:
-        parsed_expr = parse_latex(latex_text)
-    except Exception as error:
-        raise RuntimeError(f"Math parsing failed: {error}") from error
+    """Parse LaTeX into SymPy and return a lightweight analysis.
 
-    problem_type = classify_problem_type(latex_text, parsed_expr)
+    If raw OCR output is too noisy, try cleaned candidates before giving up.
+    """
+    candidates = [
+        latex_text,
+        _extract_best_equation_candidate(latex_text),
+        _strip_text_macros(latex_text),
+    ]
+
+    parsed_expr = None
+    selected_candidate = latex_text
+    for candidate in candidates:
+        if not candidate or candidate.isspace():
+            continue
+        try:
+            parsed_expr = parse_latex(candidate)
+            selected_candidate = candidate
+            break
+        except Exception:
+            pass
+
+    if parsed_expr is None:
+        return MathAnalysis(
+            problem_type="Needs Cleaner Image",
+            structure_summary=(
+                "The OCR output included too much non-math text, so symbolic parsing could not run."
+            ),
+            verification_summary=(
+                "No symbolic verification was possible yet. Try cropping tightly around the equation."
+            ),
+            normalized_expression=selected_candidate,
+        )
+
+    problem_type = classify_problem_type(selected_candidate, parsed_expr)
     structure_summary = summarize_structure(parsed_expr)
     verification_summary, normalized_expression = verify_expression(parsed_expr)
 

@@ -21,7 +21,7 @@ class ChatMessage(BaseModel):
 class TutorState(rx.State):
     """Reflex state that coordinates the upload and chat flow."""
 
-    uploaded_image_url: str = ""
+    uploaded_image_name: str = ""
     extracted_text: str = ""
     problem_type: str = ""
     structure_summary: str = ""
@@ -41,6 +41,7 @@ class TutorState(rx.State):
         self.is_loading = True
         self.error_message = ""
         self.extracted_text = ""
+        self.uploaded_image_name = ""
         self.problem_type = ""
         self.structure_summary = ""
         self.verification_summary = ""
@@ -53,7 +54,7 @@ class TutorState(rx.State):
                 raise RuntimeError("Please upload an image before analyzing it.")
 
             saved_path = await save_upload_file(files[0])
-            self.uploaded_image_url = rx.get_upload_url(saved_path.name)
+            self.uploaded_image_name = saved_path.name
             self.extracted_text = extract_latex_from_image(saved_path)
             math_analysis = analyze_math_expression(self.extracted_text)
             self.problem_type = math_analysis.problem_type

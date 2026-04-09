@@ -8,11 +8,33 @@ from tutor_app.state import TutorState, ChatMessage
 
 def upload_box() -> rx.Component:
     return rx.upload(
-        rx.vstack(
-            rx.text("Drag an image here or click to browse.", font_weight="600"),
-            rx.text("PNG, JPG, JPEG, or WEBP", color="#64748b", font_size="0.95em"),
-            spacing="2",
-            align="center",
+        rx.cond(
+            TutorState.uploaded_image_name != "",
+            rx.vstack(
+                rx.image(
+                    src=rx.get_upload_url(TutorState.uploaded_image_name),
+                    alt="Uploaded homework image",
+                    max_height="220px",
+                    border_radius="12px",
+                    object_fit="contain",
+                    border="1px solid #e2e8f0",
+                    bg="white",
+                    padding="0.4em",
+                ),
+                rx.text(
+                    "Image uploaded. Click here to replace it.",
+                    color="#475569",
+                    font_size="0.92em",
+                ),
+                spacing="2",
+                align="center",
+            ),
+            rx.vstack(
+                rx.text("Drag an image here or click to browse.", font_weight="600"),
+                rx.text("PNG, JPG, JPEG, or WEBP", color="#64748b", font_size="0.95em"),
+                spacing="2",
+                align="center",
+            ),
         ),
         id=UPLOAD_ID,
         accept={"image/*": [".png", ".jpg", ".jpeg", ".webp"]},
@@ -90,22 +112,6 @@ def math_analysis_box() -> rx.Component:
     )
 
 
-def image_preview() -> rx.Component:
-    return rx.cond(
-        TutorState.uploaded_image_url != "",
-        rx.image(
-            src=TutorState.uploaded_image_url,
-            alt="Uploaded homework image",
-            max_height="260px",
-            border_radius="16px",
-            object_fit="contain",
-            border="1px solid #e2e8f0",
-            bg="white",
-            padding="0.5em",
-        ),
-    )
-
-
 def error_text() -> rx.Component:
     return rx.cond(
         TutorState.error_message != "",
@@ -165,7 +171,7 @@ def chat_box() -> rx.Component:
             # Input area
             rx.hstack(
                 rx.input(
-                    placeholder="Ask a follow-up question…",
+                    placeholder="Ask a follow-up question...",
                     value=TutorState.chat_input,
                     on_change=TutorState.set_chat_input,
                     flex="1",
@@ -219,7 +225,6 @@ def index() -> rx.Component:
                 color_scheme="blue",
             ),
             error_text(),
-            image_preview(),
             response_box(),
             extracted_text_box(),
             math_analysis_box(),
