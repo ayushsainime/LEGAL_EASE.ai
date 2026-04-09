@@ -8,11 +8,15 @@ RUN useradd -m -u 1000 user
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV/Pix2TeX
+# Install system dependencies for OpenCV/Pix2TeX + curl for bun
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Install bun system-wide (needed by Reflex for frontend)
+RUN BUN_INSTALL=/usr/local curl -fsSL https://bun.sh/install | bash
 
 # Install Python dependencies (torch CPU-only to save ~1.5 GB)
 COPY requirements.txt /app/requirements.txt
@@ -23,9 +27,6 @@ RUN pip install --upgrade pip && \
 
 # Copy application code
 COPY . /app
-
-# Initialize Reflex frontend (run as root so bun/npm install works)
-RUN reflex init
 
 # Fix ownership after all installs
 RUN chown -R user:user /app /home/user
