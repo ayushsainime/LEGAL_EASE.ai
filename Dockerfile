@@ -3,32 +3,21 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# Create non-root user (required by HF Spaces)
 RUN useradd -m -u 1000 user
 
 WORKDIR /app
 
-# Install system dependencies for OpenCV/Pix2TeX + curl for bun
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
-    curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install bun system-wide (needed by Reflex for frontend)
-RUN BUN_INSTALL=/usr/local curl -fsSL https://bun.sh/install | bash
-
-# Install Python dependencies (torch CPU-only to save ~1.5 GB)
 COPY requirements.txt /app/requirements.txt
-RUN pip install --upgrade pip && \
-    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
-    grep -v "^torch" /app/requirements.txt > /app/requirements_docker.txt && \
-    pip install -r /app/requirements_docker.txt
 
-# Copy application code
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
+
 COPY . /app
 
-# Fix ownership after all installs
 RUN chown -R user:user /app /home/user
 
 USER user
