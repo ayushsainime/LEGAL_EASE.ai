@@ -106,3 +106,22 @@ class TutorState(rx.State):
             )
         finally:
             self.is_chat_loading = False
+
+    def clear_image(self):
+        """Clear the uploaded image and reset analysis/chat state."""
+        self.uploaded_image_name = ""
+        self.extracted_text = ""
+        self.problem_type = ""
+        self.structure_summary = ""
+        self.verification_summary = ""
+        self.normalized_expression = ""
+        self.tutor_response = DEFAULT_MESSAGE
+        self.error_message = ""
+        self.chat_messages = []
+        self.chat_input = ""
+        self.is_chat_loading = False
+        return rx.clear_selected_files(UPLOAD_ID)
+
+    def set_chat_input(self, value: str):
+        """Explicit setter for chat input (avoids deprecated auto-setters)."""
+        self.chat_input = value

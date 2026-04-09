@@ -144,53 +144,58 @@ def chat_message_bubble(msg: ChatMessage) -> rx.Component:
 
 def chat_box() -> rx.Component:
     """Chat panel for follow-up Socratic conversation."""
-    return rx.cond(
-        TutorState.extracted_text != "",
-        rx.box(
-            rx.heading("Continue the Conversation", size="5"),
+    return rx.box(
+        rx.heading("Conversation", size="6"),
+        rx.text(
+            "Discuss your steps with the tutor. It will keep guiding you with Socratic questions.",
+            color="#475569",
+            margin_bottom="1em",
+        ),
+        rx.cond(
+            TutorState.extracted_text == "",
             rx.text(
-                "Ask follow-up questions about the math problem. "
-                "The tutor will guide you with more Socratic questions.",
-                color="#475569",
+                "Upload and analyze an image first to start the conversation.",
+                color="#64748b",
                 margin_bottom="1em",
             ),
-            # Chat messages area
-            rx.box(
-                rx.foreach(TutorState.chat_messages, chat_message_bubble),
-                width="100%",
-                max_height="400px",
-                overflow_y="auto",
-                padding="0.75em",
-                border_radius="12px",
-                bg="#f8fafc",
-                border="1px solid #e2e8f0",
-                margin_bottom="1em",
-                display="flex",
-                flex_direction="column",
+        ),
+        rx.box(
+            rx.foreach(TutorState.chat_messages, chat_message_bubble),
+            width="100%",
+            min_height="460px",
+            max_height="65vh",
+            overflow_y="auto",
+            padding="0.75em",
+            border_radius="12px",
+            bg="#f8fafc",
+            border="1px solid #e2e8f0",
+            margin_bottom="1em",
+            display="flex",
+            flex_direction="column",
+        ),
+        rx.hstack(
+            rx.input(
+                placeholder="Ask a follow-up question...",
+                value=TutorState.chat_input,
+                on_change=TutorState.set_chat_input,
+                flex="1",
+                disabled=TutorState.extracted_text == "",
             ),
-            # Input area
-            rx.hstack(
-                rx.input(
-                    placeholder="Ask a follow-up question...",
-                    value=TutorState.chat_input,
-                    on_change=TutorState.set_chat_input,
-                    flex="1",
-                ),
-                rx.button(
-                    "Send",
-                    on_click=TutorState.send_chat_message,
-                    loading=TutorState.is_chat_loading,
-                    color_scheme="blue",
-                ),
-                width="100%",
-                spacing="2",
+            rx.button(
+                "Send",
+                on_click=TutorState.send_chat_message,
+                loading=TutorState.is_chat_loading,
+                color_scheme="blue",
+                disabled=TutorState.extracted_text == "",
             ),
             width="100%",
-            padding="1.25em",
-            border_radius="16px",
-            bg="white",
-            box_shadow="0 10px 30px rgba(15, 23, 42, 0.08)",
+            spacing="2",
         ),
+        width="100%",
+        padding="1.25em",
+        border_radius="16px",
+        bg="white",
+        box_shadow="0 10px 30px rgba(15, 23, 42, 0.08)",
     )
 
 
@@ -207,33 +212,57 @@ def index() -> rx.Component:
                 color="#475569",
                 max_width="42em",
             ),
-            upload_box(),
-            rx.vstack(
-                rx.foreach(
-                    rx.selected_files(UPLOAD_ID),
-                    lambda file_name: rx.text(file_name, color="#475569"),
+            rx.flex(
+                rx.vstack(
+                    upload_box(),
+                    rx.vstack(
+                        rx.foreach(
+                            rx.selected_files(UPLOAD_ID),
+                            lambda file_name: rx.text(file_name, color="#475569"),
+                        ),
+                        width="100%",
+                        align="start",
+                    ),
+                    rx.hstack(
+                        rx.button(
+                            "Analyze Image",
+                            on_click=TutorState.analyze_image(rx.upload_files(UPLOAD_ID)),
+                            loading=TutorState.is_loading,
+                            size="3",
+                            flex="1",
+                            color_scheme="blue",
+                        ),
+                        rx.button(
+                            "Clear Image",
+                            on_click=TutorState.clear_image,
+                            variant="soft",
+                            color_scheme="gray",
+                            size="3",
+                        ),
+                        width="100%",
+                        spacing="2",
+                    ),
+                    error_text(),
+                    response_box(),
+                    extracted_text_box(),
+                    math_analysis_box(),
+                    spacing="4",
+                    align="start",
+                    width="100%",
+                    flex="1",
                 ),
-                width="100%",
+                rx.box(chat_box(), width="100%", flex="1"),
+                direction="row",
                 align="start",
-            ),
-            rx.button(
-                "Analyze Image",
-                on_click=TutorState.analyze_image(rx.upload_files(UPLOAD_ID)),
-                loading=TutorState.is_loading,
-                size="3",
                 width="100%",
-                color_scheme="blue",
+                gap="1.25em",
+                wrap="wrap",
             ),
-            error_text(),
-            response_box(),
-            extracted_text_box(),
-            math_analysis_box(),
-            chat_box(),
             spacing="5",
             align="center",
             width="100%",
-            max_width="48em",
-            padding="2em",
+            max_width="100%",
+            padding="1.25em",
         ),
         min_height="100vh",
         width="100%",
