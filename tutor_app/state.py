@@ -31,12 +31,16 @@ class TutorState(rx.State):
     error_message: str = ""
     is_loading: bool = False
 
+    # Analysis progress tracking
+    analysis_progress: int = 0
+    analysis_stage: str = ""
+
     # Chat state
     chat_messages: list[ChatMessage] = []
     chat_input: str = ""
     is_chat_loading: bool = False
 
-    async def analyze_image(self, files: list[rx.UploadFile]) -> None:
+    async def analyze_image(self, files: list[rx.UploadFile]):
         """Save the image, extract text, and ask for one Socratic hint."""
         self.is_loading = True
         self.error_message = ""
@@ -48,25 +52,54 @@ class TutorState(rx.State):
         self.normalized_expression = ""
         self.tutor_response = DEFAULT_MESSAGE
         self.chat_messages = []
+        self.analysis_progress = 0
+        self.analysis_stage = "Preparing..."
+        yield
 
         try:
             if not files:
                 raise RuntimeError("Please upload an image before analyzing it.")
 
+            # Stage 1: Upload
+            self.analysis_stage = "Uploading image..."
+            self.analysis_progress = 10
+            yield
+
             saved_path = await save_upload_file(files[0])
             self.uploaded_image_name = saved_path.name
+            self.analysis_progress = 20
+            self.analysis_stage = "Reading math from image..."
+            yield
+
+            # Stage 2: OCR
+            self.analysis_progress = 40
+            yield
             self.extracted_text = extract_latex_from_image(saved_path)
+            self.analysis_progress = 55
+            self.analysis_stage = "Analyzing expression..."
+            yield
+
+            # Stage 3: Symbolic analysis
             math_analysis = analyze_math_expression(self.extracted_text)
             self.problem_type = math_analysis.problem_type
             self.structure_summary = math_analysis.structure_summary
             self.verification_summary = math_analysis.verification_summary
             self.normalized_expression = math_analysis.normalized_expression
+            self.analysis_progress = 75
+            self.analysis_stage = "Generating Socratic question..."
+            yield
+
+            # Stage 4: AI response
             self.tutor_response = ask_socratic_question(
                 extracted_text=self.extracted_text,
                 problem_type=self.problem_type,
                 structure_summary=self.structure_summary,
                 verification_summary=self.verification_summary,
             )
+            self.analysis_progress = 100
+            self.analysis_stage = "Complete!"
+            yield
+
             # Seed the chat with the first tutor response
             self.chat_messages = [
                 ChatMessage(role="tutor", content=self.tutor_response),
@@ -76,6 +109,8 @@ class TutorState(rx.State):
             self.tutor_response = "I couldn't analyze that image yet. Try a clearer photo."
         finally:
             self.is_loading = False
+            self.analysis_progress = 0
+            self.analysis_stage = ""
 
     async def send_chat_message(self) -> None:
         """Send a follow-up question and get a Socratic response."""
@@ -120,6 +155,9 @@ class TutorState(rx.State):
         self.chat_messages = []
         self.chat_input = ""
         self.is_chat_loading = False
+        self.is_loading = False
+        self.analysis_progress = 0
+        self.analysis_stage = ""
         return rx.clear_selected_files(UPLOAD_ID)
 
     def set_chat_input(self, value: str):
