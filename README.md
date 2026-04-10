@@ -1,4 +1,4 @@
----
+<!-- ---
 title: Socratic Maths Tutor AI
 emoji: 🎓
 colorFrom: red
@@ -8,7 +8,7 @@ app_port: 3000
 pinned: false
 license: mit
 short_description: Socratic AI-powered mathematics tutoring with image OCR
----
+--- -->
 
 <p align="center">
   <img src="https://huggingface.co/datasets/ayushsainime/socratic_maths_tutor_media/resolve/main/female-math-tutor-writes-equations-blackboard-chalk-student-writes-them-down-notebook-vector-413658303.jpg" alt="Socratic Maths Tutor" width="120" height="120" style="border-radius: 20px; border: 3px solid #E63946;" />
@@ -38,6 +38,7 @@ short_description: Socratic AI-powered mathematics tutoring with image OCR
 </p>
 
 ---
+TRY IT OUT - ![APP_LINK](https://huggingface.co/spaces/ayushsainime/socratic_maths_tutor.ai)
 
 ## ✨ Features
 
