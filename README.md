@@ -38,7 +38,7 @@ short_description: Socratic AI-powered mathematics tutoring with image OCR
 </p>
 
 ---
-TRY IT OUT - ![APP_LINK](https://huggingface.co/spaces/ayushsainime/socratic_maths_tutor.ai)
+TRY IT OUT - ➡️➡️![APP_LINK](https://huggingface.co/spaces/ayushsainime/socratic_maths_tutor.ai) ⬅️⬅️
 
 ## ✨ Features
 
