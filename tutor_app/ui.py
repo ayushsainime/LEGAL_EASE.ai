@@ -631,6 +631,28 @@ def index() -> rx.Component:
             margin="0 auto",
             padding="1.5em",
         ),
+        # Credits box — fixed bottom-right
+        rx.link(
+            rx.hstack(
+                rx.text("Made by", color=TEXT_MUTED, font_size="0.75em"),
+                rx.text("Ayush Saini", color=TEXT_PRIMARY, font_size="0.75em", font_weight="700"),
+                rx.icon("linkedin", size=13, color="#0A66C2"),
+                spacing="1",
+                align="center",
+                background="rgba(15, 15, 18, 0.85)",
+                padding="0.4em 0.8em",
+                border_radius="8px",
+                border=f"1px solid {CARD_BORDER}",
+                backdrop_filter="blur(12px)",
+            ),
+            href="https://www.linkedin.com/in/ayush-saini-30a4a0372/",
+            is_external=True,
+            position="fixed",
+            bottom="1em",
+            right="1.5em",
+            z_index="999",
+            text_decoration="none",
+        ),
         # Background image with cover
         min_height="100vh",
         width="100%",
