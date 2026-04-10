@@ -648,7 +648,7 @@ def index() -> rx.Component:
             href="https://www.linkedin.com/in/ayush-saini-30a4a0372/",
             is_external=True,
             position="fixed",
-            bottom="1em",
+            top="1em",
             right="1.5em",
             z_index="999",
             text_decoration="none",
