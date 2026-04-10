@@ -232,7 +232,7 @@ def error_text() -> rx.Component:
     return rx.cond(
         TutorState.error_message != "",
         rx.hstack(
-            rx.icon("alert-circle", size=18, color=ERROR_RED),
+            rx.icon("circle-alert", size=18, color=ERROR_RED),
             rx.text(
                 TutorState.error_message,
                 color=ERROR_RED,

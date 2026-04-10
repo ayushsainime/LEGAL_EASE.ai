@@ -4,7 +4,7 @@ emoji: 🎓
 colorFrom: red
 colorTo: gray
 sdk: docker
-app_port: 7860
+app_port: 3000
 pinned: false
 license: mit
 short_description: Socratic AI-powered mathematics tutoring with image OCR
