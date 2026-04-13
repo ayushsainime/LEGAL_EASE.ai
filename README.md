@@ -24,8 +24,8 @@ pinned: false
 <br/>
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Try_Now-FF4B4B?style=for-the-badge&logo=huggingface&logoColor=white)](https://huggingface.co/spaces/ayushsainime/Legal_ease.ai)
-[![YouTube](https://img.shields.io/badge/📺_Watch_Demo-Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
-[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ayushsainime/SOCRATIC_MATH_TUTOR.AI)
+[![YouTube](https://img.shields.io/badge/📺_Watch_Demo-Video-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/watch?v=8cMD_Ozhfvg)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/ayushsainime/LEGAL_EASE.ai)
 
 <br/>
 
