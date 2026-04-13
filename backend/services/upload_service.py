@@ -15,7 +15,7 @@ async def save_upload_file(upload_file: Any) -> Path:
     original_name = Path(
         getattr(upload_file, "name", None)
         or getattr(upload_file, "filename", None)
-        or "math_homework.png"
+        or "document.pdf"
     ).name
     saved_name = f"{int(time.time())}_{original_name}"
     saved_path = upload_dir / saved_name

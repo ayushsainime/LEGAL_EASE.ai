@@ -3,21 +3,21 @@ from __future__ import annotations
 import reflex as rx
 
 from tutor_app.constants import APP_TITLE, UPLOAD_ID
-from tutor_app.state import TutorState, ChatMessage
+from tutor_app.state import LegalDocState, ChatMessage
 
 # ─── Theme constants ───────────────────────────────────────────────
 BG_IMAGE = (
-    "https://huggingface.co/datasets/ayushsainime/socratic_maths_tutor_media/"
-    "resolve/main/istockphoto-2162577218-2048x2048.jpg"
+    "https://huggingface.co/datasets/ayushsainime/legal_ease_media/"
+    "resolve/main/About%20Chalk%20Law%20Office.jpg"
 )
 HEADING_IMAGE = (
-    "https://huggingface.co/datasets/ayushsainime/socratic_maths_tutor_media/"
-    "resolve/main/female-math-tutor-writes-equations-blackboard-chalk-"
-    "student-writes-them-down-notebook-vector-413658303.jpg"
+    "https://huggingface.co/datasets/ayushsainime/legal_ease_media/"
+    "resolve/main/law-concept-there-are-many-books-and-scales-of-justice-in-cartoon-style-for-your-design-vector.jpg"
 )
 
-ACCENT = "#E63946"
-ACCENT_HOVER = "#FF4D5A"
+ACCENT = "#F29F05"            # Golden amber
+ACCENT_HOVER = "#F2C791"      # Light gold
+ACCENT_DARK = "#D9763D"       # Burnt orange
 DARK_BG = "rgba(10, 10, 10, 0.88)"
 CARD_BG = "rgba(15, 15, 18, 0.92)"
 CARD_BORDER = "rgba(255, 255, 255, 0.1)"
@@ -27,7 +27,7 @@ TEXT_SECONDARY = "rgba(255, 255, 255, 0.7)"
 TEXT_MUTED = "rgba(255, 255, 255, 0.5)"
 INPUT_BG = "rgba(255, 255, 255, 0.08)"
 INPUT_BORDER = "rgba(255, 255, 255, 0.15)"
-TUTOR_BUBBLE = "rgba(230, 57, 70, 0.22)"
+AI_BUBBLE = "rgba(242, 159, 5, 0.22)"
 USER_BUBBLE = "rgba(255, 255, 255, 0.12)"
 ERROR_RED = "#FF6B6B"
 SUCCESS_GREEN = "rgba(76, 175, 80, 0.85)"
@@ -54,22 +54,18 @@ def _glass_card(*children, **kwargs) -> rx.Component:
 def upload_box() -> rx.Component:
     return rx.upload(
         rx.cond(
-            TutorState.uploaded_image_name != "",
+            LegalDocState.uploaded_file_name != "",
             rx.vstack(
-                rx.image(
-                    src=rx.get_upload_url(TutorState.uploaded_image_name),
-                    alt="Uploaded homework image",
-                    max_height="240px",
-                    border_radius="12px",
-                    object_fit="contain",
-                    border=f"1px solid {ACCENT}",
-                    bg="rgba(0,0,0,0.5)",
-                    padding="0.5em",
-                    box_shadow=f"0 0 16px rgba(230, 57, 70, 0.2)",
+                rx.icon("file-check", size=36, color=SUCCESS_GREEN),
+                rx.text(
+                    LegalDocState.doc_file_name,
+                    color=TEXT_PRIMARY,
+                    font_weight="600",
+                    font_size="0.95em",
                 ),
                 rx.text(
-                    "✅ Image uploaded — click to replace",
-                    color="#4ADE80",
+                    "✅ Document uploaded — click to replace",
+                    color=SUCCESS_GREEN,
                     font_size="0.88em",
                     font_weight="600",
                 ),
@@ -79,7 +75,7 @@ def upload_box() -> rx.Component:
             rx.cond(
                 rx.selected_files(UPLOAD_ID).length() > 0,
                 rx.vstack(
-                    rx.icon("file-check", size=36, color="#4ADE80"),
+                    rx.icon("file-check", size=36, color=SUCCESS_GREEN),
                     rx.text(
                         rx.selected_files(UPLOAD_ID)[0],
                         color=TEXT_PRIMARY,
@@ -87,23 +83,23 @@ def upload_box() -> rx.Component:
                         font_size="0.95em",
                     ),
                     rx.text(
-                        "File selected — click Analyze below",
-                        color="#4ADE80",
+                        "File selected — click Process Document below",
+                        color=SUCCESS_GREEN,
                         font_size="0.85em",
                     ),
                     spacing="2",
                     align="center",
                 ),
                 rx.vstack(
-                    rx.icon("image-plus", size=32, color=ACCENT),
+                    rx.icon("file-up", size=32, color=ACCENT),
                     rx.text(
-                        "Drag an image here or click to browse",
+                        "Drag a document here or click to browse",
                         font_weight="600",
                         color=TEXT_PRIMARY,
                         font_size="1em",
                     ),
                     rx.text(
-                        "PNG · JPG · JPEG · WEBP",
+                        "PDF · DOCX · TXT",
                         color=TEXT_MUTED,
                         font_size="0.85em",
                     ),
@@ -113,9 +109,14 @@ def upload_box() -> rx.Component:
             ),
         ),
         id=UPLOAD_ID,
-        accept={"image/*": [".png", ".jpg", ".jpeg", ".webp"]},
+        accept={
+            "application/pdf": [".pdf"],
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+            "application/msword": [".doc"],
+            "text/plain": [".txt"],
+        },
         max_files=1,
-        border=f"2px dashed rgba(230, 57, 70, 0.4)",
+        border=f"2px dashed rgba(242, 159, 5, 0.4)",
         border_radius="16px",
         padding="2.5em",
         width="100%",
@@ -125,97 +126,65 @@ def upload_box() -> rx.Component:
     )
 
 
-# ─── Tutor response card ──────────────────────────────────────────
-def response_box() -> rx.Component:
+# ─── Simplified document card ─────────────────────────────────────
+def simplified_box() -> rx.Component:
     return _glass_card(
         rx.hstack(
-            rx.icon("message-circle", size=20, color=ACCENT),
-            rx.heading("Tutor Response", size="5", color=TEXT_PRIMARY),
+            rx.icon("file-text", size=20, color=ACCENT),
+            rx.heading("Simplified Version", size="5", color=TEXT_PRIMARY),
             spacing="2",
             align="center",
         ),
         rx.box(
             rx.text(
-                TutorState.tutor_response,
+                LegalDocState.simplified_text,
                 white_space="pre-wrap",
                 line_height="1.8",
                 color="rgba(255, 255, 255, 0.88)",
-                font_size="0.98em",
+                font_size="0.95em",
             ),
             margin_top="0.8em",
-            padding_left="0.2em",
+            padding="0.8em",
+            max_height="500px",
+            overflow_y="auto",
+            background="rgba(0, 0, 0, 0.3)",
+            border_radius="10px",
+            border=f"1px solid {CARD_BORDER}",
         ),
     )
 
 
-# ─── Extracted LaTeX ──────────────────────────────────────────────
-def extracted_text_box() -> rx.Component:
+# ─── Document metadata card ────────────────────────────────────────
+def metadata_box() -> rx.Component:
     return rx.cond(
-        TutorState.extracted_text != "",
+        LegalDocState.doc_file_name != "",
         _glass_card(
             rx.hstack(
-                rx.icon("file-text", size=18, color=ACCENT),
-                rx.heading("Extracted Math (LaTeX)", size="4", color=TEXT_PRIMARY),
-                spacing="2",
-                align="center",
-            ),
-            rx.text(
-                TutorState.extracted_text,
-                white_space="pre-wrap",
-                color=TEXT_SECONDARY,
-                margin_top="0.6em",
-                font_family="monospace",
-                font_size="0.92em",
-            ),
-            border_left=f"3px solid {ACCENT}",
-        ),
-    )
-
-
-# ─── Math analysis card ───────────────────────────────────────────
-def math_analysis_box() -> rx.Component:
-    return rx.cond(
-        TutorState.problem_type != "",
-        _glass_card(
-            rx.hstack(
-                rx.icon("bar-chart-3", size=18, color=ACCENT),
-                rx.heading("Math Analysis", size="4", color=TEXT_PRIMARY),
+                rx.icon("info", size=18, color=ACCENT),
+                rx.heading("Document Info", size="4", color=TEXT_PRIMARY),
                 spacing="2",
                 align="center",
             ),
             rx.vstack(
                 rx.hstack(
-                    rx.text("Problem Type:", font_weight="700", color=TEXT_PRIMARY, font_size="0.9em"),
-                    rx.text(TutorState.problem_type, color=ACCENT, font_weight="600", font_size="0.9em"),
+                    rx.text("File:", font_weight="700", color=TEXT_PRIMARY, font_size="0.88em"),
+                    rx.text(LegalDocState.doc_file_name, color=ACCENT, font_weight="600", font_size="0.88em"),
                     spacing="2",
                 ),
-                rx.box(
-                    rx.text("Structure:", font_weight="700", color=TEXT_PRIMARY, font_size="0.85em"),
-                    rx.text(
-                        TutorState.structure_summary,
-                        white_space="pre-wrap",
-                        color=TEXT_SECONDARY,
-                        font_size="0.85em",
-                    ),
+                rx.hstack(
+                    rx.text("Type:", font_weight="700", color=TEXT_PRIMARY, font_size="0.88em"),
+                    rx.text(LegalDocState.doc_file_type, color=TEXT_SECONDARY, font_size="0.88em"),
+                    spacing="2",
                 ),
-                rx.box(
-                    rx.text("Verification:", font_weight="700", color=TEXT_PRIMARY, font_size="0.85em"),
-                    rx.text(
-                        TutorState.verification_summary,
-                        white_space="pre-wrap",
-                        color=TEXT_SECONDARY,
-                        font_size="0.85em",
-                    ),
+                rx.hstack(
+                    rx.text("Pages:", font_weight="700", color=TEXT_PRIMARY, font_size="0.88em"),
+                    rx.text(LegalDocState.doc_page_count, color=TEXT_SECONDARY, font_size="0.88em"),
+                    spacing="2",
                 ),
-                rx.box(
-                    rx.text("Normalized:", font_weight="700", color=TEXT_PRIMARY, font_size="0.85em"),
-                    rx.text(
-                        TutorState.normalized_expression,
-                        white_space="pre-wrap",
-                        color=TEXT_SECONDARY,
-                        font_family="monospace",
-                        font_size="0.85em",
-                    ),
+                rx.hstack(
+                    rx.text("Words:", font_weight="700", color=TEXT_PRIMARY, font_size="0.88em"),
+                    rx.text(LegalDocState.doc_word_count, color=TEXT_SECONDARY, font_size="0.88em"),
+                    spacing="2",
                 ),
                 spacing="3",
                 margin_top="0.6em",
@@ -227,14 +196,76 @@ def math_analysis_box() -> rx.Component:
     )
 
 
+# ─── Raw extracted text (collapsible) ──────────────────────────────
+def raw_text_box() -> rx.Component:
+    return rx.cond(
+        LegalDocState.extracted_text != "",
+        _glass_card(
+            rx.hstack(
+                rx.icon("scroll-text", size=18, color=ACCENT),
+                rx.heading("Extracted Text", size="4", color=TEXT_PRIMARY),
+                rx.spacer(),
+                rx.button(
+                    rx.hstack(
+                        rx.cond(
+                            LegalDocState.show_raw_text,
+                            rx.icon("chevron-up", size=16),
+                            rx.icon("chevron-down", size=16),
+                        ),
+                        rx.text(
+                            LegalDocState.show_raw_text,
+                            "Hide",
+                            "Show",
+                            font_size="0.82em",
+                            font_weight="600",
+                        ),
+                        spacing="1",
+                        align="center",
+                    ),
+                    on_click=LegalDocState.toggle_raw_text,
+                    variant="ghost",
+                    size="2",
+                    color=TEXT_SECONDARY,
+                    border=f"1px solid {INPUT_BORDER}",
+                    border_radius="8px",
+                    padding="0.3em 0.7em",
+                ),
+                spacing="2",
+                align="center",
+                width="100%",
+            ),
+            rx.cond(
+                LegalDocState.show_raw_text,
+                rx.box(
+                    rx.text(
+                        LegalDocState.extracted_text,
+                        white_space="pre-wrap",
+                        color=TEXT_SECONDARY,
+                        font_size="0.88em",
+                        line_height="1.6",
+                        max_height="400px",
+                        overflow_y="auto",
+                    ),
+                    margin_top="0.6em",
+                    padding="0.8em",
+                    background="rgba(0, 0, 0, 0.3)",
+                    border_radius="10px",
+                    border=f"1px solid {CARD_BORDER}",
+                ),
+            ),
+            border_left=f"3px solid {ACCENT}",
+        ),
+    )
+
+
 # ─── Error text ────────────────────────────────────────────────────
 def error_text() -> rx.Component:
     return rx.cond(
-        TutorState.error_message != "",
+        LegalDocState.error_message != "",
         rx.hstack(
             rx.icon("circle-alert", size=18, color=ERROR_RED),
             rx.text(
-                TutorState.error_message,
+                LegalDocState.error_message,
                 color=ERROR_RED,
                 font_weight="600",
                 font_size="0.92em",
@@ -252,14 +283,14 @@ def error_text() -> rx.Component:
 
 # ─── Chat message bubble ──────────────────────────────────────────
 def chat_message_bubble(msg: ChatMessage) -> rx.Component:
-    is_tutor = msg.role == "tutor"
+    is_assistant = msg.role == "assistant"
     return rx.box(
         rx.hstack(
             rx.cond(
-                is_tutor,
+                is_assistant,
                 rx.box(
-                    rx.icon("graduation-cap", size=16, color=ACCENT),
-                    bg="rgba(230, 57, 70, 0.15)",
+                    rx.icon("scale", size=16, color=ACCENT),
+                    bg="rgba(242, 159, 5, 0.15)",
                     border_radius="8px",
                     padding="0.35em",
                     flex_shrink="0",
@@ -285,11 +316,11 @@ def chat_message_bubble(msg: ChatMessage) -> rx.Component:
         padding="0.9em 1.1em",
         border_radius="14px",
         max_width="88%",
-        align_self=rx.cond(is_tutor, "start", "end"),
-        background=rx.cond(is_tutor, TUTOR_BUBBLE, USER_BUBBLE),
+        align_self=rx.cond(is_assistant, "start", "end"),
+        background=rx.cond(is_assistant, AI_BUBBLE, USER_BUBBLE),
         border=rx.cond(
-            is_tutor,
-            f"1px solid rgba(230, 57, 70, 0.2)",
+            is_assistant,
+            "1px solid rgba(242, 159, 5, 0.2)",
             f"1px solid {INPUT_BORDER}",
         ),
         margin_bottom="0.6em",
@@ -302,22 +333,22 @@ def chat_box() -> rx.Component:
     return _glass_card(
         rx.hstack(
             rx.icon("messages-square", size=22, color=ACCENT),
-            rx.heading("Conversation", size="6", color=TEXT_PRIMARY),
+            rx.heading("Chat with Document", size="6", color=TEXT_PRIMARY),
             spacing="2",
             align="center",
         ),
         rx.text(
-            "Discuss your steps with the tutor. It will keep guiding you with Socratic questions.",
+            "Ask questions about your legal document. Get plain-English answers based on its content.",
             color=TEXT_SECONDARY,
             margin_bottom="1em",
             font_size="0.9em",
         ),
         rx.cond(
-            TutorState.extracted_text == "",
+            LegalDocState.extracted_text == "",
             rx.hstack(
                 rx.icon("lock", size=14, color=TEXT_MUTED),
                 rx.text(
-                    "Upload and analyze an image first to start the conversation.",
+                    "Upload and process a document first to start chatting.",
                     color=TEXT_MUTED,
                     margin_bottom="1em",
                     font_size="0.88em",
@@ -326,10 +357,11 @@ def chat_box() -> rx.Component:
             ),
         ),
         rx.box(
-            rx.foreach(TutorState.chat_messages, chat_message_bubble),
+            rx.foreach(LegalDocState.chat_messages, chat_message_bubble),
             width="100%",
-            min_height="420px",
-            max_height="60vh",
+            min_height="520px",
+            max_height="100%",
+            flex_grow="1",
             overflow_y="auto",
             padding="0.75em",
             border_radius="12px",
@@ -341,19 +373,20 @@ def chat_box() -> rx.Component:
         ),
         rx.hstack(
             rx.input(
-                placeholder="Ask a follow-up question...",
-                value=TutorState.chat_input,
-                on_change=TutorState.set_chat_input,
+                placeholder="Ask about your document...",
+                value=LegalDocState.chat_input,
+                on_change=LegalDocState.set_chat_input,
                 flex="1",
-                disabled=TutorState.extracted_text == "",
+                disabled=LegalDocState.extracted_text == "",
                 background=INPUT_BG,
                 border=f"1px solid {INPUT_BORDER}",
                 color=TEXT_PRIMARY,
-                _placeholder={"color": TEXT_MUTED},
-                _focus={"border_color": ACCENT, "box_shadow": f"0 0 0 2px rgba(230, 57, 70, 0.2)"},
+                _placeholder={"color": "#F29F05"},
+                _focus={"border_color": ACCENT, "box_shadow": "0 0 0 2px rgba(242, 159, 5, 0.2)"},
                 border_radius="10px",
-                padding="0.7em 1em",
+                padding="1em 1.2em",
                 font_size="0.95em",
+                min_height="52px",
             ),
             rx.button(
                 rx.hstack(
@@ -362,9 +395,9 @@ def chat_box() -> rx.Component:
                     spacing="2",
                     align="center",
                 ),
-                on_click=TutorState.send_chat_message,
-                loading=TutorState.is_chat_loading,
-                disabled=TutorState.extracted_text == "",
+                on_click=LegalDocState.send_chat_message,
+                loading=LegalDocState.is_chat_loading,
+                disabled=LegalDocState.extracted_text == "",
                 background=ACCENT,
                 color="white",
                 border="none",
@@ -374,7 +407,7 @@ def chat_box() -> rx.Component:
                 cursor="pointer",
                 _hover={"background": ACCENT_HOVER, "transform": "translateY(-1px)"},
                 transition="all 0.2s ease",
-                box_shadow=f"0 4px 14px rgba(230, 57, 70, 0.3)",
+                box_shadow="0 4px 14px rgba(242, 159, 5, 0.3)",
             ),
             width="100%",
             spacing="3",
@@ -387,12 +420,12 @@ def _page_heading() -> rx.Component:
     return rx.hstack(
         rx.image(
             src=HEADING_IMAGE,
-            height="180px",
-            width="180px",
+            height="130px",
+            width="130px",
             border_radius="20px",
             object_fit="cover",
             border=f"3px solid {ACCENT}",
-            box_shadow=f"0 0 32px rgba(230, 57, 70, 0.45)",
+            box_shadow="0 0 28px rgba(242, 159, 5, 0.4)",
             flex_shrink="0",
         ),
         rx.vstack(
@@ -407,7 +440,7 @@ def _page_heading() -> rx.Component:
                 line_height="1",
             ),
             rx.text(
-                "Socratic AI-Powered Mathematics Tutoring",
+                "AI-Powered Legal Document Simplifier & Chat",
                 color=ACCENT,
                 font_size="0.92em",
                 font_weight="500",
@@ -417,9 +450,9 @@ def _page_heading() -> rx.Component:
                 margin_top="0.2em",
             ),
             rx.text(
-                "Upload a photo of a handwritten math equation or worked solution. "
-                "The app reads the math, analyzes its structure, checks it "
-                "symbolically, and replies with one guiding question instead of the final answer.",
+                "Upload a legal document (PDF, DOCX, or TXT) and get a simplified "
+                "plain-English version. Ask questions, understand clauses, and navigate "
+                "complex legal language with ease.",
                 color=TEXT_SECONDARY,
                 font_size="0.85em",
                 line_height="1.5",
@@ -450,15 +483,15 @@ def index() -> rx.Component:
                     rx.hstack(
                         rx.badge(
                             "AI Powered",
-                            color_scheme="red",
+                            color_scheme="yellow",
                             variant="solid",
                             font_size="0.75em",
                             padding="0.4em 0.8em",
                             border_radius="8px",
                         ),
                         rx.badge(
-                            "Socratic Method",
-                            color_scheme="red",
+                            "Legal AI",
+                            color_scheme="yellow",
                             variant="surface",
                             font_size="0.75em",
                             padding="0.4em 0.8em",
@@ -481,7 +514,7 @@ def index() -> rx.Component:
                 height="3px",
                 background=ACCENT,
                 border_radius="2px",
-                box_shadow=f"0 0 12px rgba(230, 57, 70, 0.4)",
+                box_shadow="0 0 12px rgba(242, 159, 5, 0.4)",
             ),
 
             # ── Two-column layout ──
@@ -505,12 +538,12 @@ def index() -> rx.Component:
                         rx.button(
                             rx.hstack(
                                 rx.icon("scan-line", size=18),
-                                rx.text("Analyze Image", font_weight="700"),
+                                rx.text("Process Document", font_weight="700"),
                                 spacing="2",
                                 align="center",
                             ),
-                            on_click=TutorState.analyze_image(rx.upload_files(UPLOAD_ID)),
-                            loading=TutorState.is_loading,
+                            on_click=LegalDocState.process_document(rx.upload_files(UPLOAD_ID)),
+                            loading=LegalDocState.is_loading,
                             size="3",
                             flex="1",
                             background=ACCENT,
@@ -520,7 +553,7 @@ def index() -> rx.Component:
                             cursor="pointer",
                             _hover={"background": ACCENT_HOVER, "transform": "translateY(-1px)"},
                             transition="all 0.2s ease",
-                            box_shadow=f"0 4px 18px rgba(230, 57, 70, 0.35)",
+                            box_shadow="0 4px 18px rgba(242, 159, 5, 0.35)",
                         ),
                         rx.button(
                             rx.hstack(
@@ -529,7 +562,7 @@ def index() -> rx.Component:
                                 spacing="2",
                                 align="center",
                             ),
-                            on_click=TutorState.clear_image,
+                            on_click=LegalDocState.clear_document,
                             variant="outline",
                             size="3",
                             border="1px solid rgba(255, 255, 255, 0.3)",
@@ -537,20 +570,81 @@ def index() -> rx.Component:
                             border_radius="12px",
                             background="rgba(255, 255, 255, 0.05)",
                             cursor="pointer",
-                            _hover={"border_color": ACCENT, "color": ACCENT, "background": "rgba(230, 57, 70, 0.1)"},
+                            _hover={"border_color": ACCENT, "color": ACCENT, "background": "rgba(242, 159, 5, 0.1)"},
                             transition="all 0.2s ease",
                         ),
                         width="100%",
                         spacing="3",
                     ),
+                    # ── Sample documents bar ──
+                    _glass_card(
+                        rx.hstack(
+                            rx.icon("file-search", size=16, color=ACCENT),
+                            rx.text(
+                                "Try a sample:",
+                                color=TEXT_SECONDARY,
+                                font_size="0.85em",
+                                font_weight="600",
+                            ),
+                            rx.button(
+                                rx.hstack(
+                                    rx.icon("file-text", size=14),
+                                    rx.text("Legal Services Agreement", font_size="0.82em", font_weight="600"),
+                                    spacing="1",
+                                    align="center",
+                                ),
+                                on_click=LegalDocState.load_sample_document(
+                                    "https://huggingface.co/datasets/ayushsainime/legal_ease_media/resolve/main/Legal-Services-Agreement.pdf",
+                                    "Legal Services Agreement.pdf",
+                                ),
+                                disabled=LegalDocState.is_loading,
+                                size="2",
+                                variant="outline",
+                                color=ACCENT,
+                                border=f"1px solid rgba(242, 159, 5, 0.3)",
+                                border_radius="8px",
+                                background="rgba(242, 159, 5, 0.05)",
+                                cursor="pointer",
+                                _hover={"background": "rgba(242, 159, 5, 0.15)", "border_color": ACCENT},
+                                transition="all 0.2s ease",
+                            ),
+                            rx.button(
+                                rx.hstack(
+                                    rx.icon("file-text", size=14),
+                                    rx.text("Draft Agreement", font_size="0.82em", font_weight="600"),
+                                    spacing="1",
+                                    align="center",
+                                ),
+                                on_click=LegalDocState.load_sample_document(
+                                    "https://huggingface.co/datasets/ayushsainime/legal_ease_media/resolve/main/Draft%20Agreement.pdf",
+                                    "Draft Agreement.pdf",
+                                ),
+                                disabled=LegalDocState.is_loading,
+                                size="2",
+                                variant="outline",
+                                color=ACCENT,
+                                border=f"1px solid rgba(242, 159, 5, 0.3)",
+                                border_radius="8px",
+                                background="rgba(242, 159, 5, 0.05)",
+                                cursor="pointer",
+                                _hover={"background": "rgba(242, 159, 5, 0.15)", "border_color": ACCENT},
+                                transition="all 0.2s ease",
+                            ),
+                            rx.spacer(),
+                            spacing="3",
+                            align="center",
+                            width="100%",
+                        ),
+                        padding="0.8em 1em",
+                    ),
                     # Progress indicator
                     rx.cond(
-                        TutorState.is_loading,
+                        LegalDocState.is_loading,
                         rx.vstack(
                             rx.hstack(
                                 rx.spinner(size="3", color=ACCENT),
                                 rx.text(
-                                    TutorState.analysis_progress,
+                                    LegalDocState.analysis_progress,
                                     color=ACCENT,
                                     font_weight="800",
                                     font_size="1.2em",
@@ -563,7 +657,7 @@ def index() -> rx.Component:
                                 ),
                                 rx.text("—", color=TEXT_MUTED, font_size="1em"),
                                 rx.text(
-                                    TutorState.analysis_stage,
+                                    LegalDocState.analysis_stage,
                                     color=TEXT_SECONDARY,
                                     font_size="0.92em",
                                     font_weight="500",
@@ -573,7 +667,7 @@ def index() -> rx.Component:
                                 width="100%",
                             ),
                             rx.progress(
-                                value=TutorState.analysis_progress,
+                                value=LegalDocState.analysis_progress,
                                 width="100%",
                                 height="8px",
                                 border_radius="4px",
@@ -584,13 +678,13 @@ def index() -> rx.Component:
                             padding="1em",
                             background=CARD_BG,
                             border_radius="12px",
-                            border=f"1px solid rgba(230, 57, 70, 0.3)",
+                            border="1px solid rgba(242, 159, 5, 0.3)",
                         ),
                     ),
                     error_text(),
-                    response_box(),
-                    extracted_text_box(),
-                    math_analysis_box(),
+                    metadata_box(),
+                    simplified_box(),
+                    raw_text_box(),
                     spacing="4",
                     align="start",
                     width="100%",
@@ -598,7 +692,15 @@ def index() -> rx.Component:
                     min_width="0",
                 ),
                 # Right column: chat
-                rx.box(chat_box(), width="100%", flex="1", min_width="0"),
+                rx.box(
+                    chat_box(),
+                    width="100%",
+                    flex="1",
+                    min_width="0",
+                    height="100%",
+                    display="flex",
+                    flex_direction="column",
+                ),
                 direction="row",
                 align="stretch",
                 width="100%",
@@ -609,13 +711,13 @@ def index() -> rx.Component:
             # ── Footer ──
             rx.hstack(
                 rx.text(
-                    "© Socratic AI Tutor",
+                    "© Legal Doc AI",
                     color=TEXT_MUTED,
                     font_size="0.8em",
                 ),
                 rx.text("·", color=TEXT_MUTED, font_size="0.8em"),
                 rx.text(
-                    "Powered by Groq & Pix2TeX",
+                    "Powered by Groq",
                     color=TEXT_MUTED,
                     font_size="0.8em",
                 ),
@@ -631,7 +733,7 @@ def index() -> rx.Component:
             margin="0 auto",
             padding="1.5em",
         ),
-        # Credits box — fixed bottom-right
+        # Credits box — fixed top-right
         rx.link(
             rx.hstack(
                 rx.text("Made by", color=TEXT_MUTED, font_size="0.75em"),

@@ -1,1 +1,1 @@
-"""Socratic AI Tutor package."""
+"""Legal Doc AI — Legal Document Simplifier & Chat."""

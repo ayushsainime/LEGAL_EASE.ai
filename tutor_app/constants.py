@@ -1,6 +1,6 @@
-APP_TITLE = "Socratic Maths Tutor"
-UPLOAD_ID = "math_upload"
+APP_TITLE = "Legal Doc AI"
+UPLOAD_ID = "doc_upload"
 DEFAULT_MESSAGE = (
-    "Upload an image of your math work, then click Analyze Image to get one "
-    "guiding Socratic question."
+    "Upload a legal document (PDF, DOCX, or TXT) to get a simplified "
+    "plain-English version you can chat with."
 )

@@ -3,11 +3,12 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
+# HF Spaces runs as user 1000 by default
 RUN useradd -m -u 1000 user
 
 WORKDIR /app
 
-# System deps: libgl1/libglib2 for OpenCV, curl+unzip for Reflex bun install
+# System deps: libgl1/libglib2 for image processing, curl+unzip for Reflex bun install
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
@@ -15,12 +16,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps — use CPU-only torch to save ~1.5 GB download time
+# Install Python deps (no torch needed — much lighter image)
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip && \
-    pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
-    grep -v "^torch" /app/requirements.txt > /app/requirements_docker.txt && \
-    pip install -r /app/requirements_docker.txt
+    pip install -r /app/requirements.txt
 
 # Copy application code
 COPY . /app
@@ -37,6 +36,7 @@ USER user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH
 
-EXPOSE 3000
+# HF Spaces uses port 7860 by default
+EXPOSE 7860
 
-CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "3000", "--single-port"]
+CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "7860", "--single-port"]

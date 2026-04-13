@@ -5,8 +5,11 @@ __pycache__
 .web
 .states
 reflex.db
-
 media_tutor_ai
 .env
 ap_key.py
 uploaded_files
+models/
+backend/services/math_ocr_service.py
+backend/services/math_service.py
+backend/services/tutor_service.py

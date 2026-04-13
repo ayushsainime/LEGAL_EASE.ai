@@ -1,196 +1,124 @@
-<!-- ---
-title: Socratic Maths Tutor AI
-emoji: 🎓
-colorFrom: red
-colorTo: gray
+---
+title: Legal Doc AI
+emoji: ⚖️
+colorFrom: yellow
+colorTo: amber
 sdk: docker
-app_port: 3000
+app_port: 7860
 pinned: false
-license: mit
-short_description: Socratic AI-powered mathematics tutoring with image OCR
---- -->
+---
 
-<div align="center">
+# ⚖️ Legal Doc AI — AI-Powered Legal Document Simplifier & Chat
 
-<img src="https://huggingface.co/datasets/ayushsainime/socratic_maths_tutor_media/resolve/main/female-math-tutor-writes-equations-blackboard-chalk-student-writes-them-down-notebook-vector-413658303.jpg" alt="Socratic Maths Tutor" width="130" height="130" style="border-radius: 24px; border: 3px solid #E63946;" />
+A web application that simplifies legal documents into plain English and lets you chat with them. Upload PDFs, DOCX files, or text documents, get an easy-to-understand version, and ask questions about any clause or term.
 
-# SOCRATIC MATHS TUTOR
-
-*An AI-powered Socratic tutoring system that guides students through handwritten math problems — one thoughtful question at a time.*
-
-[![Live Demo](https://img.shields.io/badge/Live-Demo-E63946?style=for-the-badge&logo=google-chrome&logoColor=white)](https://huggingface.co/spaces/ayushsainime/socratic_maths_tutor.ai)
-[![Python 3.11](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Reflex](https://img.shields.io/badge/Reflex-0.8.27-00B4D8?style=for-the-badge&logo=react&logoColor=white)](https://reflex.dev)
-[![Groq](https://img.shields.io/badge/Groq-LLaMA_3.3-F55036?style=for-the-badge&logoColor=white)](https://groq.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-2EA043?style=for-the-badge)](./LICENSE)
-
-</div>
+**Built with** [Reflex](https://reflex.dev/) · [Groq](https://groq.com/) · [PyMuPDF](https://pymupdf.readthedocs.io/) · [python-docx](https://python-docx.readthedocs.io/)
 
 ---
 
-## Overview
+## ✨ Features
 
-**Socratic Maths Tutor** is a full-stack AI application that transforms photos of handwritten math into interactive, guided learning sessions. Instead of giving away answers, the AI tutor uses the **Socratic method** — asking targeted questions that help students discover solutions on their own.
-
-The system combines **deep-learning OCR** (Pix2TeX), **symbolic math analysis** (SymPy), and **large language model reasoning** (Groq LLaMA 3.3 70B) into a seamless pipeline wrapped in a modern dark-themed web interface built with Reflex.
-
-> Try it live → [**Hugging Face Spaces**](https://huggingface.co/spaces/ayushsainime/socratic_maths_tutor.ai)
-
----
-
-## Architecture
-
-<div align="center">
-  <img src="https://huggingface.co/datasets/ayushsainime/socratic_maths_tutor_media/resolve/main/architechrute%20diagram%20101.png" alt="Architecture Diagram" width="100%" />
-</div>
-
-| Layer | File(s) | Responsibility |
-|-------|---------|----------------|
-| **Frontend** | `tutor_app/ui.py` | Dark glassmorphism UI with upload, results, and chat panels |
-| **State Management** | `tutor_app/state.py` | Reflex state orchestrating the 4-stage analysis pipeline |
-| **Upload** | `backend/services/upload_service.py` | Saves uploaded images via Reflex's upload directory |
-| **Math OCR** | `backend/services/math_ocr_service.py` | Pix2TeX model converts images → LaTeX |
-| **Symbolic Analysis** | `backend/services/math_service.py` | SymPy parses LaTeX, classifies problem type, verifies symbolically |
-| **AI Tutor** | `backend/services/tutor_service.py` | Sends Socratic prompts to Groq LLaMA 3.3 70B |
-| **REST API** | `backend/api.py` | FastAPI endpoint exposing the pipeline programmatically |
+- **📄 Multi-format support** — Upload PDF, DOCX, or TXT files
+- **🔄 Legal simplification** — Complex legal jargon rewritten in plain English
+- **💬 Chat with your document** — Ask questions and get answers grounded in the document's content
+- **📋 Document metadata** — File name, type, page count, and word count at a glance
+- **🔍 Raw text viewer** — Expandable section to see the original extracted text
+- **📝 Sample documents** — Try built-in sample legal agreements to see how it works
+- **🎨 Dark glassmorphism UI** — Sleek, modern interface with a golden amber accent
+- **⚡ Fast AI responses** — Powered by Groq's LPU inference engine (Llama 3.3 70B)
+- **🔒 Privacy-first** — Documents are processed server-side; no third-party data storage
 
 ---
 
-## Features
-
-- **Image Upload & OCR** — Snap a photo of handwritten math; the app extracts LaTeX using a vision-to-LaTeX neural network (Pix2TeX).
-- **Symbolic Math Analysis** — Extracted expressions are parsed with SymPy for classification (Algebra, Calculus, Trigonometry, etc.), structural summarization, and symbolic verification.
-- **Socratic AI Tutoring** — The AI never solves the problem. It asks exactly one guiding question per response, nudging the student forward.
-- **Interactive Chat** — Continue the conversation with the tutor, which maintains full context of the problem and chat history.
-- **Professional Dark UI** — Glassmorphism dark theme with a black, white & red accent palette, built with Reflex.
-- **Privacy-First** — All processing happens server-side; no third-party data storage.
-- **Docker-Ready** — Single-command containerized deployment.
-
----
-
-## Tech Stack
-
-| Category | Technology | Purpose |
-|----------|-----------|---------|
-| **Web Framework** | [Reflex](https://reflex.dev) v0.8.27 | Full-stack Python framework with React frontend |
-| **AI / LLM** | [Groq](https://groq.com) — LLaMA 3.3 70B | Fast inference for Socratic tutoring prompts |
-| **Math OCR** | [Pix2TeX](https://github.com/lukas-blecher/LaTeX-OCR) | Deep learning image → LaTeX conversion |
-| **Symbolic Math** | [SymPy](https://www.sympy.org) | LaTeX parsing, classification, simplification & solving |
-| **REST API** | [FastAPI](https://fastapi.tiangolo.com) | Programmatic access endpoint |
-| **Containerization** | [Docker](https://www.docker.com) | Production deployment |
-
----
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Prerequisites
 
-- **Python 3.11+**
-- **Groq API Key** — Get one free at [console.groq.com](https://console.groq.com)
+- Python 3.11+
+- A [Groq API key](https://console.groq.com/)
 
-### Setup
+### Installation
 
 ```bash
-# 1. Clone the repository
+# Clone the repo
 git clone https://github.com/ayushsainime/SOCRATIC_MATH_TUTOR.AI.git
 cd SOCRATIC_MATH_TUTOR.AI
 
-# 2. Create and activate a virtual environment
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # macOS / Linux
-
-# 3. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. Configure your API key
-echo GROQ_API_KEY=your_key_here > .env
+# Set your Groq API key
+echo "GROQ_API_KEY=your_key_here" > .env
 
-# 5. Run the application
+# Run the app
 reflex run
 ```
 
-The app will be live at **http://localhost:3000**
+The app will be available at `http://localhost:3000`.
 
 ---
 
-## Docker Deployment
+## 🐳 Docker (Local)
 
 ```bash
-# Build the image
-docker build -t socratic-maths-tutor .
-
-# Run the container
-docker run -d \
-  --name socratic-tutor \
-  -p 7860:7860 \
-  -e GROQ_API_KEY=your_groq_api_key \
-  socratic-maths-tutor
+# Build and run
+docker build -t legal-doc-ai .
+docker run -p 3000:3000 -e GROQ_API_KEY=your_key legal-doc-ai
 ```
-
-Access at **http://localhost:7860**
 
 ---
 
-## Environment Variables
+## ☁️ Hugging Face Spaces Deployment
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | ✅ | Your Groq API key for LLM inference |
+This app is configured for HF Spaces Docker deployment:
+
+1. Create a new **Docker** Space on [huggingface.co/spaces](https://huggingface.co/spaces)
+2. Push this repo to the Space's Git repository
+3. Add `GROQ_API_KEY` as a **Repository Secret** in Space Settings → Variables and secrets
+4. The Space will build and deploy automatically
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
-Socratic Maths Tutor
-├── tutor_app/                  # Frontend (Reflex)
-│   ├── tutor_app.py            # App entry point
-│   ├── ui.py                   # UI components & layout
-│   ├── state.py                # State management & event handlers
-│   └── constants.py            # App configuration constants
-│
-├── backend/                    # Backend services
-│   ├── api.py                  # FastAPI REST endpoint
-│   ├── models.py               # Pydantic response models
+├── tutor_app/                 # Frontend (Reflex)
+│   ├── tutor_app.py           # App entry point
+│   ├── ui.py                  # All UI components
+│   ├── state.py               # State management (LegalDocState)
+│   └── constants.py           # App title, upload ID, defaults
+├── backend/
 │   └── services/
-│       ├── upload_service.py   # File upload handling
-│       ├── math_ocr_service.py # Pix2TeX LaTeX OCR
-│       ├── math_service.py     # SymPy symbolic analysis
-│       └── tutor_service.py    # Groq Socratic prompting
-│
-├── models/pix2tex/             # OCR model weights
-├── Dockerfile                  # Production container
-├── requirements.txt            # Python dependencies
-└── rxconfig.py                 # Reflex configuration
+│       ├── document_service.py # Text extraction (PDF, DOCX, TXT)
+│       ├── legal_service.py    # AI simplification, summarization, chat
+│       └── upload_service.py   # File upload handling
+├── .env                       # GROQ_API_KEY (gitignored)
+├── requirements.txt
+├── Dockerfile
+└── README.md
 ```
 
 ---
 
-## Contributing
+## 🛠️ How It Works
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. **Fork** the repository
-2. Create a **feature branch** (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. Open a **Pull Request**
+1. **Upload** — Drag & drop or browse to upload a legal document (PDF, DOCX, or TXT)
+2. **Extract** — Text is extracted using PyMuPDF (PDF) or python-docx (DOCX)
+3. **Simplify** — The Groq LLM rewrites the document in plain, understandable English
+4. **Chat** — Ask follow-up questions about any clause, term, or section — answers are grounded in the document content
 
 ---
 
-## License
+## ⚠️ Disclaimer
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This tool is for **informational purposes only** and does **not** constitute legal advice. Always consult a qualified attorney for legal matters.
 
 ---
 
-<div align="center">
-  <sub>Built with ❤️ for mathematics education</sub>
-  <br/><br/>
-  <strong>Made by Ayush Saini</strong>
-  <br/>
-  <a href="https://www.linkedin.com/in/ayush-saini-30a4a0372/">
-    <img src="https://img.shields.io/badge/LinkedIn-Ayush%20Saini-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" />
-  </a>
-</div>
+## 📝 License
+
+MIT License — feel free to use and modify.
+
+---
+
+Made by [Ayush Saini](https://www.linkedin.com/in/ayush-saini-30a4a0372/)
