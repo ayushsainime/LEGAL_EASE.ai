@@ -2,7 +2,7 @@
 title: Legal Doc AI
 emoji: ⚖️
 colorFrom: yellow
-colorTo: amber
+colorTo: gray
 sdk: docker
 app_port: 7860
 pinned: false
