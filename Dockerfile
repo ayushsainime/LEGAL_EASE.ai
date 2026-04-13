@@ -3,20 +3,26 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
 
-# HF Spaces runs as user 1000 by default
+# HF Spaces runs as user 1000
 RUN useradd -m -u 1000 user
 
 WORKDIR /app
 
-# System deps: libgl1/libglib2 for image processing, curl+unzip for Reflex bun install
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgl1 \
     libglib2.0-0 \
     unzip \
     curl \
+    git \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python deps (no torch needed — much lighter image)
+# Install bun (Reflex needs it for frontend builds)
+RUN curl -fsSL https://bun.sh/install | BUN_INSTALL="/usr/local" bash
+
+# Install Python deps
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip && \
     pip install -r /app/requirements.txt
@@ -24,8 +30,18 @@ RUN pip install --upgrade pip && \
 # Copy application code
 COPY . /app
 
-# Pre-build Reflex frontend during Docker build (as root, so bun/npm work)
-# This avoids the 30-min runtime timeout on HF Spaces
+# Remove old math service files that would cause import errors
+RUN rm -f /app/backend/services/math_ocr_service.py \
+           /app/backend/services/math_service.py \
+           /app/backend/services/tutor_service.py \
+           /app/backend/services/__pycache__/math_ocr_service*.pyc \
+           /app/backend/services/__pycache__/math_service*.pyc \
+           /app/backend/services/__pycache__/tutor_service*.pyc \
+           /app/backend/__pycache__/*.pyc \
+    || true
+
+# Pre-build Reflex frontend during Docker build
+ENV HOME=/root
 RUN reflex init
 
 # Fix ownership after all installs and builds
@@ -34,9 +50,8 @@ RUN chown -R user:user /app /home/user
 USER user
 
 ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:$PATH
+    PATH=/home/user/.local/bin:/usr/local/bin:$PATH
 
-# HF Spaces uses port 7860 by default
 EXPOSE 7860
 
 CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "7860", "--single-port"]

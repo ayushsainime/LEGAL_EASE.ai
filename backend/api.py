@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from fastapi import FastAPI, File, UploadFile
 
-from backend.models import AnalyzeImageResponse
-from backend.services.math_ocr_service import extract_latex_from_image
-from backend.services.math_service import analyze_math_expression
-from backend.services.tutor_service import ask_socratic_question
+from backend.models import ProcessDocumentResponse
+from backend.services.document_service import extract_text, get_document_metadata
+from backend.services.legal_service import simplify_document
 from backend.services.upload_service import save_upload_file
 
-fastapi_app = FastAPI(title="Socratic AI Tutor API")
+fastapi_app = FastAPI(title="Legal Doc AI API")
 
 
 @fastapi_app.get("/api/health")
@@ -17,26 +16,19 @@ async def health_check() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@fastapi_app.post("/api/analyze-image", response_model=AnalyzeImageResponse)
-async def analyze_image_api(file: UploadFile = File(...)) -> AnalyzeImageResponse:
-    """Analyze an uploaded image through a plain FastAPI endpoint."""
+@fastapi_app.post("/api/process-document", response_model=ProcessDocumentResponse)
+async def process_document_api(file: UploadFile = File(...)) -> ProcessDocumentResponse:
+    """Process an uploaded document through a plain FastAPI endpoint."""
     saved_path = await save_upload_file(file)
-    extracted_text = extract_latex_from_image(saved_path)
-    math_analysis = analyze_math_expression(extracted_text)
-    tutor_response = ask_socratic_question(
-        extracted_text=extracted_text,
-        problem_type=math_analysis.problem_type,
-        structure_summary=math_analysis.structure_summary,
-        verification_summary=math_analysis.verification_summary,
-    )
+    extracted = extract_text(saved_path)
+    metadata = get_document_metadata(saved_path, extracted)
+    simplified = simplify_document(extracted)
 
-    return AnalyzeImageResponse(
-        filename=saved_path.name,
-        image_url=f"/_upload/{saved_path.name}",
-        extracted_text=extracted_text,
-        problem_type=math_analysis.problem_type,
-        structure_summary=math_analysis.structure_summary,
-        verification_summary=math_analysis.verification_summary,
-        normalized_expression=math_analysis.normalized_expression,
-        tutor_response=tutor_response,
+    return ProcessDocumentResponse(
+        filename=metadata["file_name"],
+        file_type=metadata["file_type"],
+        page_count=metadata["page_count"],
+        word_count=metadata["word_count"],
+        extracted_text=extracted,
+        simplified_text=simplified,
     )
