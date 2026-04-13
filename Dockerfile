@@ -50,8 +50,9 @@ RUN chown -R user:user /app /home/user
 USER user
 
 ENV HOME=/home/user \
-    PATH=/home/user/.local/bin:/usr/local/bin:$PATH
+    PATH=/home/user/.local/bin:/usr/local/bin:$PATH \
+    PORT=7860
 
 EXPOSE 7860
 
-CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--backend-port", "7860", "--single-port"]
+CMD ["reflex", "run", "--env", "prod", "--backend-host", "0.0.0.0", "--single-port"]
